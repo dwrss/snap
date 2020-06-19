@@ -17,6 +17,7 @@ class CliSpec extends AnyWordSpec with Matchers with EitherValues {
 					case ParseResult.Done(remainder, result) =>
 						remainder shouldBe empty
 						result should be(1)
+					case _ => fail("Parsing should have failed")
 				}
 			}
 		}
@@ -26,6 +27,7 @@ class CliSpec extends AnyWordSpec with Matchers with EitherValues {
 				InputParser.parseNum(randomString) match {
 					case ParseResult.Fail(input, _, _) =>
 						input should be(randomString)
+					case _ => fail("Parsing should have failed")
 				}
 			}
 		}
@@ -38,6 +40,7 @@ class CliSpec extends AnyWordSpec with Matchers with EitherValues {
 						case ParseResult.Done(remainder, result) =>
 							remainder shouldBe empty
 							result should be(SuitMatching)
+						case _ => fail("Parsing should have failed")
 					}
 				}
 				"'v'" in {
@@ -45,6 +48,7 @@ class CliSpec extends AnyWordSpec with Matchers with EitherValues {
 						case ParseResult.Done(remainder, result) =>
 							remainder shouldBe empty
 							result should be(ValueMatching)
+						case _ => fail("Parsing should have failed")
 					}
 				}
 				"'b'" in {
@@ -52,6 +56,7 @@ class CliSpec extends AnyWordSpec with Matchers with EitherValues {
 						case ParseResult.Done(remainder, result) =>
 							remainder shouldBe empty
 							result should be(BothMatching)
+						case _ => fail("Parsing should have failed")
 					}
 				}
 			}
@@ -60,6 +65,7 @@ class CliSpec extends AnyWordSpec with Matchers with EitherValues {
 					InputParser.parseMatchStrategy("t") match {
 						case ParseResult.Fail(input, _, _) =>
 							input should be ("t")
+						case _ => fail("Parsing should have failed")
 					}
 				}
 			}
@@ -71,6 +77,7 @@ class CliSpec extends AnyWordSpec with Matchers with EitherValues {
 						case ParseResult.Done(remainder, result) =>
 							remainder shouldBe empty
 							result should be(SuitMatching)
+						case _ => fail("Parsing should have failed")
 					}
 				}
 				"'value'" in {
@@ -78,6 +85,7 @@ class CliSpec extends AnyWordSpec with Matchers with EitherValues {
 						case ParseResult.Done(remainder, result) =>
 							remainder shouldBe empty
 							result should be(ValueMatching)
+						case _ => fail("Parsing should have failed")
 					}
 				}
 				"'both'" in {
@@ -85,6 +93,7 @@ class CliSpec extends AnyWordSpec with Matchers with EitherValues {
 						case ParseResult.Done(remainder, result) =>
 							remainder shouldBe empty
 							result should be(BothMatching)
+						case _ => fail("Parsing should have failed")
 					}
 				}
 			}
@@ -93,6 +102,7 @@ class CliSpec extends AnyWordSpec with Matchers with EitherValues {
 					InputParser.parseMatchStrategy("fooBar") match {
 						case ParseResult.Fail(input, _, _) =>
 							input should be ("fooBar")
+						case _ => fail("Parsing should have failed")
 					}
 				}
 			}
