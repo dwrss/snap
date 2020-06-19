@@ -13,8 +13,8 @@ case object ValueMatching extends MatchChoice
 case object BothMatching extends MatchChoice
 
 object InputParser {
-	val numPlayersParser = int
-	def parseNumPlayers(i: String): ParseResult[Int] = numPlayersParser.parseOnly(i)
+	val numParser = int
+	def parseNum(i: String): ParseResult[Int] = numParser.parseOnly(i)
 //		.either.getOrElse(InvalidInput("Invalid number of players"))
 
 	val suitParser: Parser[SuitMatching.type] = (stringCI("suit") | char('s')) >| SuitMatching

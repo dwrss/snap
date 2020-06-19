@@ -13,7 +13,7 @@ class CliSpec extends AnyWordSpec with Matchers with EitherValues {
 	"parseNumPlayers" when provided {
 		"a number" should {
 			"parse" in {
-				InputParser.parseNumPlayers("1") match {
+				InputParser.parseNum("1") match {
 					case ParseResult.Done(remainder, result) =>
 						remainder shouldBe empty
 						result should be(1)
@@ -23,7 +23,7 @@ class CliSpec extends AnyWordSpec with Matchers with EitherValues {
 		"a string" should {
 			"not parse" in {
 				val randomString = Random.nextString(5)
-				InputParser.parseNumPlayers(randomString) match {
+				InputParser.parseNum(randomString) match {
 					case ParseResult.Fail(input, _, _) =>
 						input should be(randomString)
 				}
