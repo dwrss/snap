@@ -21,6 +21,13 @@ object Play {
 			None
 		}
 
+	def getWinningLosingPair(players: IndexedSeq[Player]): Option[(Player, Player)] =
+		Play.getRandomPlayer(players).flatMap { winningPlayer =>
+			Play.getRandomPlayer(players filterNot (_.id == winningPlayer.id)).map { losingPlayer =>
+				winningPlayer -> losingPlayer
+			}
+		}
+
 	def calcGameStateAfterWin(state: InProgress, winner: Player, loser: Player): InProgress = {
 		val updatedWinner = winner.appendToStack(loser.stack)
 		val updatedLoser = loser.removeCards()
