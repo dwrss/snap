@@ -16,18 +16,16 @@ final class InProgress private (
 	val players: Vector[Player],
 	val playerIterator: Iterator[Int],
 	val round: Int,
-	val currentPlayer: Player
+	val currentPlayer: Player,
+	val winsTotal: Int
 ) extends GameState {
-	def withUpdatedPlayers(playerToUpdate: Player): InProgress = {
-		val updatedPlayers = this.players.updated(playerToUpdate.index, playerToUpdate)
-		copy(players = updatedPlayers)
-	}
 	def withUpdatedPlayers(playersToUpdate: Player*): InProgress = {
 		val updatedPlayerList = playersToUpdate.foldLeft(this.players) { (updatedList, playerToUpdate) =>
 			updatedList.updated(playerToUpdate.index, playerToUpdate)
 		}
 		copy(players = updatedPlayerList)
 	}
+	def incWins(): InProgress = copy(winsTotal = this.winsTotal + 1)
 	def withUpdatedPlayerAndDeck(player: Player, deck: Deck): InProgress = {
 		val updatedPlayers = players.updated(player.index, player)
 		copy(players=updatedPlayers, deck=deck)
@@ -42,12 +40,14 @@ final class InProgress private (
 		copy(round = this.round + 1)
 	}
 
-	private def copy(
+	def copy(
 		players: Vector[Player] = this.players,
 		deck: Deck = this.deck,
 		round: Int = this.round,
-		currentPlayer: Player = this.currentPlayer)
-	= new InProgress(this.config, deck, players, this.playerIterator, round, currentPlayer)
+		currentPlayer: Player = this.currentPlayer,
+		winsTotal: Int = this.winsTotal
+	)
+	= new InProgress(this.config, deck, players, this.playerIterator, round, currentPlayer, winsTotal)
 }
 object InProgress {
 	def apply(
@@ -55,10 +55,10 @@ object InProgress {
 		deck: Deck,
 		players: Vector[Player]): InProgress = {
 		val playerIterator = Setup.getInfiniteIterator(players.map(_.index))
-		new InProgress(config, deck, players, playerIterator, 1, players(playerIterator.next()))
+		new InProgress(config, deck, players, playerIterator, 1, players(playerIterator.next()), 0)
 	}
 
 	def unapply(arg: InProgress): Option[(GameConfig, Deck, Vector[Player], Int)] = Some((arg.config, arg.deck, arg.players, arg.round))
 }
-final case class Finished(winners: Vector[Player]) extends GameState with GameEndState
+final case class Finished(winners: Vector[Player], totalWins: Int) extends GameState with GameEndState
 case object Aborted extends GameState with GameEndState

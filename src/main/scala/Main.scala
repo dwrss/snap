@@ -9,9 +9,9 @@ object Main {
 		val result = gameRunner.run(NotStarted)
 		def getWinnerString(player: Player) = s"Player ${player.id} (${player.stack.size} cards)"
 		result match {
-			case Finished(winners) if winners.sizeIs > 1 =>
-				ConsoleIOHandler.display(s"Draw between: \n${winners.map(getWinnerString).mkString("\n")}")
-			case Finished(winners) =>
+			case Finished(winners, _) if winners.sizeIs > 1 =>
+				ConsoleIOHandler.display(s"Draw between: \n${winners.map(getWinnerString).mkString("\n")}.")
+			case Finished(winners, _) =>
 				val winningPlayer = winners.head
 				ConsoleIOHandler.display(s"Player ${winningPlayer.id} won (${winningPlayer.stack.size} cards)!")
 			case Aborted =>

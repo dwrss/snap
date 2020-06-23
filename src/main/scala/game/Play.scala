@@ -24,6 +24,6 @@ object Play {
 	def calcGameStateAfterWin(state: InProgress, winner: Player, loser: Player): InProgress = {
 		val updatedWinner = winner.appendToStack(loser.stack)
 		val updatedLoser = loser.removeCards()
-		state.withUpdatedPlayers(updatedWinner, updatedLoser)
+		state.withUpdatedPlayers(updatedWinner, updatedLoser).incWins()
 	}
 }
