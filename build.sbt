@@ -28,9 +28,7 @@ scalacOptions ++= Seq(
 	"-Ywarn-value-discard"               // Warn when non-Unit expression results are unused.
 )
 
-libraryDependencies += scallop
 libraryDependencies += enumeratum
-libraryDependencies += scalactic
 libraryDependencies += scalaTest
 libraryDependencies ++= atto
 libraryDependencies += cats

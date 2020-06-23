@@ -31,6 +31,7 @@ class GameRunner(ioHandler: IOHandler) {
 					}
 			}
 
+		// This could be made neater if the cases were split into separate partial functions
 		gameState match {
 			case NotStarted =>
 				val decksInput = ioHandler.askDecks()

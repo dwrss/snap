@@ -21,8 +21,15 @@ object Play {
 			None
 		}
 
+	/**
+	 *
+	 * @param players - The players who could potentially call "Snap"
+	 * @return - a tuple, where the first element is the "winner" (who takes the cards) and the second player is the
+	 *         "loser" (player who loses their cards)
+	 */
 	def getWinningLosingPair(players: IndexedSeq[Player]): Option[(Player, Player)] =
 		Play.getRandomPlayer(players).flatMap { winningPlayer =>
+			// The "loser" can be any other matching player other than the winner
 			Play.getRandomPlayer(players filterNot (_.id == winningPlayer.id)).map { losingPlayer =>
 				winningPlayer -> losingPlayer
 			}
