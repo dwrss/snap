@@ -40,8 +40,8 @@ class GameRunner(ioHandler: IOHandler) {
 				}
 				val nextState = decksInput pipe matchParseResult(moveToDecksSelected)
 				run(nextState)
-			case NumDecksSelected(num) if num < 1 =>
-				ioHandler.display("Please enter a number of decks greater than 0.")
+			case NumDecksSelected(num) if num < 1 || num >= 1000 =>
+				ioHandler.display("Please enter a number of decks greater than 0 and smaller than 1000.")
 				run(NotStarted)
 			case NumDecksSelected(num) =>
 				val playersInput = ioHandler.askPlayers()
@@ -49,6 +49,9 @@ class GameRunner(ioHandler: IOHandler) {
 				val moveToNumPlayers: Int => NumPlayersSelected = numPlayers => NumPlayersSelected(num, numPlayers)
 				val nextState = playersInput pipe matchParseResult(moveToNumPlayers)
 				run(nextState)
+			case NumPlayersSelected(deckNum, players) if players < 2 || players >= 1000 =>
+				ioHandler.display("Please enter a number of players greater than 1 and smaller than 1000.")
+				run(NumDecksSelected(deckNum))
 			case NumPlayersSelected(deckNum, players) =>
 				val cardInput = ioHandler.askMatchingMode()
 
@@ -63,38 +66,42 @@ class GameRunner(ioHandler: IOHandler) {
 				}
 				val nextState = cardInput pipe matchParseResult(movedToInProgress)
 				run(nextState)
+
 			case InProgress(config, _, _, _) if config.matchingMode == BothMatching && config.decks == 1 =>
 				ioHandler.display("Selecting a 'both' matching strategy with a single deck doesn't make sense")
 				run(NumPlayersSelected(config.decks, config.numPlayers))
-			case InProgress(_, deck, players, _) if deck.isEmpty =>
+			case s@InProgress(_, deck, players, _) if deck.isEmpty =>
 				val winner = players.maxBy(_.stack.size)
 				val anyOtherEquals = players.filter(otherPlayer => otherPlayer.stack.sizeCompare(winner.stack) == 0 && otherPlayer.id != winner.id)
-				run(Finished(winner +: anyOtherEquals))
+				ioHandler.blankLine()
+				ioHandler.display(s"Game ended: All cards played")
+				ioHandler.blankLine()
+				run(Finished(winner +: anyOtherEquals, s.winsTotal))
 			case s@InProgress(config, deck, _, round) =>
 				val (card, remainingDeck) = deck.dealCard
 				val currentPlayer = s.currentPlayer.prependCard(card)
 				if (s.isStartOfRound) {
+					ioHandler.blankLine()
 					ioHandler.display(s"[Round $round]")
 				}
 				ioHandler.display(s"Player ${currentPlayer.id}'s turn")
 				ioHandler.display(s"Card dealt: $card")
 				val newState = s.withUpdatedPlayerAndDeck(currentPlayer, remainingDeck)
 				val playersWithMatches = Play.findPlayersWithMatch(config.matchingMode.matchCards)(card, newState.players)
-				val stateAfterResolution = Play.getRandomPlayer(playersWithMatches).flatMap{winningPlayer =>
-						Play.getRandomPlayer(playersWithMatches filterNot (_.id == winningPlayer.id)).map{ losingPlayer =>
-								ioHandler.display(s"Player ${winningPlayer.id} snap!")
-								ioHandler.display(s"Player ${winningPlayer.id} takes: ${losingPlayer.stack.size} card(s)")
-								Play.calcGameStateAfterWin(s, winningPlayer, losingPlayer)
-						}
+				val stateAfterResolution = Play.getWinningLosingPair(playersWithMatches).map { winningLosingPlayers =>
+					val (winningPlayer, losingPlayer) = winningLosingPlayers
+					ioHandler.display(s"Player ${winningPlayer.id} snap!")
+					ioHandler.display(s"Player ${winningPlayer.id} takes: ${losingPlayer.stack.size} card(s)")
+					Play.calcGameStateAfterWin(s, winningPlayer, losingPlayer)
 				}.getOrElse(newState)
 				if (s.isEndOfRound) {
 					ioHandler.display(stateAfterResolution.players.map(p => {
 						s"Player ${p.id} has ${p.stack.size} card${if (p.stack.sizeIs != 1) "s" else ""}"
 					}).toString())
-					ioHandler.blankLine()
 				}
 				run(stateAfterResolution.nextPlayer)
-			case f@Finished(_) =>
+
+			case f@Finished(_, _) =>
 				f
 			case Aborted =>
 				Aborted
