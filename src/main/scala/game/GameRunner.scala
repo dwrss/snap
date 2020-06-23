@@ -15,10 +15,11 @@ class GameRunner(ioHandler: IOHandler) {
 //		import cats.implicits._
 		def matchParseResult[R](successState: R => GameState)(parseResult: ParseResult[Msg[_ <: R]]): GameState =
 			parseResult match {
-				case ParseResult.Fail(input, _, _) =>
+				case ParseResult.Fail(input, _, message) =>
 					if (input.nonEmpty) {
-						ioHandler.display(s"Invalid input '$input'")
+						ioHandler.display(s"Invalid input '$input'. $message")
 					}
+					ioHandler.display(s"Invalid input. $message")
 					gameState
 				case ParseResult.Partial(_) =>
 					ioHandler.display("Unable to parse input")
@@ -34,10 +35,10 @@ class GameRunner(ioHandler: IOHandler) {
 			case NotStarted =>
 				val decksInput = ioHandler.askDecks()
 
-				val moveToDeskSelected: Int => NumDecksSelected = numDecks => {
+				val moveToDecksSelected: Int => NumDecksSelected = numDecks => {
 					NumDecksSelected(numDecks)
 				}
-				val nextState = decksInput pipe matchParseResult(moveToDeskSelected)
+				val nextState = decksInput pipe matchParseResult(moveToDecksSelected)
 				run(nextState)
 			case NumDecksSelected(num) if num < 1 =>
 				ioHandler.display("Please enter a number of decks greater than 0.")
@@ -52,9 +53,12 @@ class GameRunner(ioHandler: IOHandler) {
 				val cardInput = ioHandler.askMatchingMode()
 
 				val movedToInProgress: MatchChoice => GameState = matchChoice => {
+					ioHandler.display("Creating players...")
 					val playerList = Setup.createPlayerList(players)
 					val gameConfig = GameConfig(deckNum, players, matchChoice)
+					ioHandler.display("Creating decks...")
 					val decks = Setup.createDeck(deckNum)
+					ioHandler.display("Starting game...")
 					InProgress(gameConfig, decks, playerList)
 				}
 				val nextState = cardInput pipe matchParseResult(movedToInProgress)
