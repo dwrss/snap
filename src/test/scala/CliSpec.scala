@@ -1,22 +1,24 @@
 import atto.ParseResult
-import cli.{BothMatching, InputParser, SuitMatching, ValueMatching}
-import org.scalatest.EitherValues
+import io.{BothMatching, ConfigInput, InputParser, SuitMatching, ValueMatching}
+import org.scalatest.{EitherValues, Inside}
 import org.scalatest.matchers.should.Matchers
 import org.scalatest.wordspec.AnyWordSpec
 
 import scala.util.Random
 
-class CliSpec extends AnyWordSpec with Matchers with EitherValues {
+class CliSpec extends AnyWordSpec with Matchers with EitherValues with Inside {
 	def provided = afterWord("provided")
 	def is = afterWord("is")
 
 	"parseNumPlayers" when provided {
 		"a number" should {
 			"parse" in {
-				InputParser.parseNum("1") match {
+				inside(InputParser.parseNumPlayers("1")) {
 					case ParseResult.Done(remainder, result) =>
 						remainder shouldBe empty
-						result should be(1)
+						inside(result) {
+							case ConfigInput(num) => num should be(1)
+						}
 					case _ => fail("Parsing should have failed")
 				}
 			}
@@ -24,10 +26,9 @@ class CliSpec extends AnyWordSpec with Matchers with EitherValues {
 		"a string" should {
 			"not parse" in {
 				val randomString = Random.nextString(5)
-				InputParser.parseNum(randomString) match {
+				inside(InputParser.parseNumPlayers(randomString)) {
 					case ParseResult.Fail(input, _, _) =>
 						input should be(randomString)
-					case _ => fail("Parsing should have failed")
 				}
 			}
 		}
@@ -36,36 +37,38 @@ class CliSpec extends AnyWordSpec with Matchers with EitherValues {
 		"a single character" should {
 			"parse one" which is {
 				"'s'" in {
-					InputParser.parseMatchStrategy("s") match {
+					inside(InputParser.parseMatchStrategy("s")) {
 						case ParseResult.Done(remainder, result) =>
 							remainder shouldBe empty
-							result should be(SuitMatching)
-						case _ => fail("Parsing should have failed")
+							inside(result) {
+								case ConfigInput(result) => result should be(SuitMatching)
+							}
 					}
 				}
 				"'v'" in {
-					InputParser.parseMatchStrategy("v") match {
+					inside(InputParser.parseMatchStrategy("v")) {
 						case ParseResult.Done(remainder, result) =>
 							remainder shouldBe empty
-							result should be(ValueMatching)
-						case _ => fail("Parsing should have failed")
+							inside(result) {
+								case ConfigInput(result) => result should be(ValueMatching)
+							}
 					}
 				}
 				"'b'" in {
-					InputParser.parseMatchStrategy("b") match {
+					inside(InputParser.parseMatchStrategy("b")) {
 						case ParseResult.Done(remainder, result) =>
 							remainder shouldBe empty
-							result should be(BothMatching)
-						case _ => fail("Parsing should have failed")
+							inside(result) {
+								case ConfigInput(result) => result should be(BothMatching)
+							}
 					}
 				}
 			}
 			"not parse a character" which is {
 				"'t'" in {
-					InputParser.parseMatchStrategy("t") match {
+					inside(InputParser.parseMatchStrategy("t")){
 						case ParseResult.Fail(input, _, _) =>
 							input should be ("t")
-						case _ => fail("Parsing should have failed")
 					}
 				}
 			}
@@ -73,36 +76,38 @@ class CliSpec extends AnyWordSpec with Matchers with EitherValues {
 		"a word" should {
 			"parse one" which is {
 				"'suit'" in {
-					InputParser.parseMatchStrategy("suit") match {
+					inside(InputParser.parseMatchStrategy("suit")) {
 						case ParseResult.Done(remainder, result) =>
 							remainder shouldBe empty
-							result should be(SuitMatching)
-						case _ => fail("Parsing should have failed")
+							inside(result) {
+								case ConfigInput(result) => result should be(SuitMatching)
+							}
 					}
 				}
 				"'value'" in {
-					InputParser.parseMatchStrategy("value") match {
+					inside(InputParser.parseMatchStrategy("value")){
 						case ParseResult.Done(remainder, result) =>
 							remainder shouldBe empty
-							result should be(ValueMatching)
-						case _ => fail("Parsing should have failed")
+							inside(result) {
+								case ConfigInput(result) => result should be(ValueMatching)
+							}
 					}
 				}
 				"'both'" in {
-					InputParser.parseMatchStrategy("both") match {
+					inside(InputParser.parseMatchStrategy("both")) {
 						case ParseResult.Done(remainder, result) =>
 							remainder shouldBe empty
-							result should be(BothMatching)
-						case _ => fail("Parsing should have failed")
+							inside(result) {
+								case ConfigInput(result) => result should be(BothMatching)
+							}
 					}
 				}
 			}
 			"not parse one" which is{
 				"'fooBar'" in {
-					InputParser.parseMatchStrategy("fooBar") match {
+					inside(InputParser.parseMatchStrategy("fooBar")){
 						case ParseResult.Fail(input, _, _) =>
 							input should be ("fooBar")
-						case _ => fail("Parsing should have failed")
 					}
 				}
 			}

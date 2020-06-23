@@ -1,6 +1,6 @@
 package game
 
-import model.{Card, Player}
+import model.{Card, InProgress, Player}
 
 import scala.util.Random
 
@@ -13,11 +13,17 @@ object Play {
 		}
 	}
 
-	def getWinningPlayer(players: IndexedSeq[Player]): Option[Player] =
+	def getRandomPlayer(players : IndexedSeq[Player]): Option[Player] =
 		if (players.nonEmpty) {
 			val matchingPlayer = players(Random.nextInt(players.size))
 			Some(matchingPlayer)
 		} else {
 			None
 		}
+
+	def calcGameStateAfterWin(state: InProgress, winner: Player, loser: Player): InProgress = {
+		val updatedWinner = winner.appendToStack(loser.stack)
+		val updatedLoser = loser.removeCards()
+		state.withUpdatedPlayers(updatedWinner, updatedLoser)
+	}
 }

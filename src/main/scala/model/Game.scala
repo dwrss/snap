@@ -1,30 +1,64 @@
 package model
 
-import cli.MatchChoice
+import io.MatchChoice
 import game.Setup
 
 case class GameConfig(decks: Int, numPlayers: Int, matchingMode: MatchChoice)
 
 sealed trait GameState
+sealed trait GameEndState extends GameState
 case object NotStarted extends GameState
 final case class NumDecksSelected(decks: Int) extends GameState
 final case class NumPlayersSelected(decks: Int, players: Int) extends GameState
-final case class InProgress private (config: GameConfig, deck: Deck, players: Vector[Player], playerIterator: Iterator[Player]) extends GameState {
-//	private def repeatingPlayerList: LazyList[Player] = LazyList.from(this.players) #::: repeatingPlayerList
-	def nextPlayer: Player = playerIterator.next()
-	def withUpdatedPlayers(playerToUpdate: Player): InProgress = copy(players = this.players.updated(playerToUpdate.index, playerToUpdate))
+final class InProgress private (
+	val config: GameConfig,
+	val deck: Deck,
+	val players: Vector[Player],
+	val playerIterator: Iterator[Int],
+	val round: Int,
+	val currentPlayer: Player
+) extends GameState {
+	def withUpdatedPlayers(playerToUpdate: Player): InProgress = {
+		val updatedPlayers = this.players.updated(playerToUpdate.index, playerToUpdate)
+		copy(players = updatedPlayers)
+	}
 	def withUpdatedPlayers(playersToUpdate: Player*): InProgress = {
 		val updatedPlayerList = playersToUpdate.foldLeft(this.players) { (updatedList, playerToUpdate) =>
 			updatedList.updated(playerToUpdate.index, playerToUpdate)
 		}
 		copy(players = updatedPlayerList)
 	}
-	def withUpdatedPlayerAndDeck(player: Player, deck: Deck): InProgress = copy(players=players.updated(player.index, player), deck=deck)
+	def withUpdatedPlayerAndDeck(player: Player, deck: Deck): InProgress = {
+		val updatedPlayers = players.updated(player.index, player)
+		copy(players=updatedPlayers, deck=deck)
+	}
+	val isStartOfRound: Boolean = this.currentPlayer.id % config.numPlayers == 1
+	val isEndOfRound: Boolean = this.currentPlayer.id % config.numPlayers == 0
+	def nextPlayer: InProgress = {
+		if (this.isEndOfRound) copy(currentPlayer = this.players(playerIterator.next())).nextRound
+		else copy(currentPlayer = this.players(playerIterator.next()))
+	}
+	private def nextRound: InProgress = {
+		copy(round = this.round + 1)
+	}
+
+	private def copy(
+		players: Vector[Player] = this.players,
+		deck: Deck = this.deck,
+		round: Int = this.round,
+		currentPlayer: Player = this.currentPlayer)
+	= new InProgress(this.config, deck, players, this.playerIterator, round, currentPlayer)
 }
 object InProgress {
 	def apply(
 		config: GameConfig,
 		deck: Deck,
-		players: Vector[Player]): InProgress = new InProgress(config, deck, players, Setup.getInfiniteIterator(players))
+		players: Vector[Player]): InProgress = {
+		val playerIterator = Setup.getInfiniteIterator(players.map(_.index))
+		new InProgress(config, deck, players, playerIterator, 1, players(playerIterator.next()))
+	}
+
+	def unapply(arg: InProgress): Option[(GameConfig, Deck, Vector[Player], Int)] = Some((arg.config, arg.deck, arg.players, arg.round))
 }
-final case class Finished(winners: Vector[Player]) extends GameState
+final case class Finished(winners: Vector[Player]) extends GameState with GameEndState
+case object Aborted extends GameState with GameEndState

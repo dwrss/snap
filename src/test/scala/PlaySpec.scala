@@ -1,4 +1,4 @@
-import cli.{BothMatching, SuitMatching, ValueMatching}
+import io.{BothMatching, SuitMatching, ValueMatching}
 import game.{Play, Setup}
 import model.CardType.{Rank, Suit}
 import model.{Card, Deck, Player}
@@ -18,7 +18,7 @@ class PlaySpec extends AnyWordSpec with Matchers {
 		}
 		"Create multiple decks correctly" in {
 			val list = Setup.createDeck(3)
-			list should equal(Deck(Deck().cards ++ Deck().cards ++ Deck().cards))
+			list.cards should contain allElementsOf(Deck().cards ++ Deck().cards ++ Deck().cards)
 		}
 	}
 	"Play" when matchingOn {
