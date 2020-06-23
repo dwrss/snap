@@ -9,7 +9,7 @@ object Setup {
 
 	def createDeck(numToCreate: Int): Deck = {
 		import cats.syntax.semigroup._
-		List.fill(numToCreate)(Deck().shuffled).reduce((a, b) => a.combine(b))
+		List.fill(numToCreate)(Deck.shuffled).reduce((a, b) => a.combine(b))
 	}
 
 	def getInfiniteIterator[T](vec: IndexedSeq[T]): Iterator[T] = {

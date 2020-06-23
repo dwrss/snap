@@ -17,5 +17,7 @@ object Deck {
 		}
 	}.toList
 
+	def shuffled: Deck = Deck(Random.shuffle(Deck.allCards))
+
 	implicit val ideckSemigroup: Semigroup[Deck] = (x: Deck, y: Deck) => Deck(x.cards ::: y.cards)
 }
