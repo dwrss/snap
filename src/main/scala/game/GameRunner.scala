@@ -12,7 +12,6 @@ class GameRunner(ioHandler: IOHandler) {
 
 	@tailrec
 	final def run(gameState: GameState): GameEndState = {
-//		import cats.implicits._
 		def matchParseResult[R](successState: R => GameState)(parseResult: ParseResult[Msg[_ <: R]]): GameState =
 			parseResult match {
 				case ParseResult.Fail(input, _, message) =>
