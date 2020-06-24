@@ -10,6 +10,9 @@ sealed trait GameEndState extends GameState
 case object NotStarted extends GameState
 final case class NumDecksSelected(decks: Int) extends GameState
 final case class NumPlayersSelected(decks: Int, players: Int) extends GameState
+//This is a normal class so the custom
+//Unapply and private constructor
+//work correctly
 final class InProgress private (
 	val config: GameConfig,
 	val deck: Deck,
@@ -40,7 +43,8 @@ final class InProgress private (
 		copy(round = this.round + 1)
 	}
 
-	def copy(
+	// Roughly replicating the method on a case class
+	def 	copy(
 		players: Vector[Player] = this.players,
 		deck: Deck = this.deck,
 		round: Int = this.round,

@@ -13,6 +13,11 @@ object Play {
 		}
 	}
 
+	/**
+	 *
+	 * @param players - The list of players from which to select
+	 * @return - Some(Player) for a non-empty list. Otherwise, None.
+	 */
 	def getRandomPlayer(players : IndexedSeq[Player]): Option[Player] =
 		if (players.nonEmpty) {
 			val matchingPlayer = players(Random.nextInt(players.size))
