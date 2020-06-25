@@ -8,10 +8,7 @@ object Setup {
 	}
 
 	def createDeck(numToCreate: Int): Deck = {
-		import cats.syntax.semigroup._
-		// This would be more efficient if we used a LazyList, but it's fast enough for any reasonable
-		// deck size
-		List.fill(numToCreate)(Deck.shuffled).reduce((a, b) => a.combine(b))
+		Deck(LazyList.fill(numToCreate)(Deck.shuffled.cards).flatten)
 	}
 
 	def getInfiniteIterator[T](vec: IndexedSeq[T]): Iterator[T] = {

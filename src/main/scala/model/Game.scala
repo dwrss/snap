@@ -44,7 +44,7 @@ final class InProgress private (
 	}
 
 	// Roughly replicating the method on a case class
-	def 	copy(
+	def copy(
 		players: Vector[Player] = this.players,
 		deck: Deck = this.deck,
 		round: Int = this.round,

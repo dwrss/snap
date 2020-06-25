@@ -4,8 +4,8 @@ import model.CardType.{Rank, Suit}
 
 import scala.util.Random
 
-case class Deck(cards: List[Card] = Deck.allCards) {
-	val isEmpty: Boolean = cards.isEmpty
+case class Deck(cards: LazyList[Card] = LazyList.from(Deck.allCards)) extends AnyVal {
+	def isEmpty: Boolean = cards.isEmpty
 	def shuffled: Deck = copy(cards=Random.shuffle(this.cards))
 	def dealCard: (Card, Deck) = cards.head -> copy(cards = this.cards.tail)
 }
@@ -17,7 +17,7 @@ object Deck {
 		}
 	}.toList
 
-	def shuffled: Deck = Deck(Random.shuffle(Deck.allCards))
+	def shuffled: Deck = Deck(LazyList.from(Random.shuffle(Deck.allCards)))
 
-	implicit val ideckSemigroup: Semigroup[Deck] = (x: Deck, y: Deck) => Deck(x.cards ::: y.cards)
+	implicit val ideckSemigroup: Semigroup[Deck] = (x: Deck, y: Deck) => Deck(x.cards #::: y.cards)
 }

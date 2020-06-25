@@ -9,16 +9,23 @@ class PlaySpec extends AnyWordSpec with Matchers {
 	def is = afterWord("is")
 	def matchingOn = afterWord("matching on")
 	// We don't really need to test that Enumeratum works, but this ensures confidence in the other tests
-	"Setup" should {
-		"Create players in order" in {
-			val list = Setup.createPlayerList(10)
-			for (i <- 1 to list.size) {
-				list(i-1).id should be (i)
+	"Setup" when {
+		"creating players" should {
+			"create them in order" in {
+				val list = Setup.createPlayerList(10)
+				for (i <- 1 to list.size) {
+					list(i - 1).id should be(i)
+				}
 			}
 		}
-		"Create multiple decks correctly" in {
-			val list = Setup.createDeck(3)
-			list.cards should contain allElementsOf(Deck().cards ++ Deck().cards ++ Deck().cards)
+		"creating decks" should {
+			"create multiple decks correctly" in {
+				val list = Setup.createDeck(3)
+				list.cards should contain allElementsOf (Deck().cards ++ Deck().cards ++ Deck().cards)
+			}
+			"not thrash the GC with a large number of decks" in {
+				Setup.createDeck(Int.MaxValue)
+			}
 		}
 	}
 	"Play" when matchingOn {
@@ -28,7 +35,7 @@ class PlaySpec extends AnyWordSpec with Matchers {
 				val player1 = Player(1, Card(Rank.Queen, Suit.Spades) :: Nil)
 				val player2 = Player(2, Card(Rank.Queen, Suit.Spades) :: Nil)
 				val players = Vector(player1, player2)
-				findPlayersFunc(Card(Rank.Queen, Suit.Spades), players) should contain allElementsOf(players)
+				findPlayersFunc(Card(Rank.Queen, Suit.Spades), players) should contain allElementsOf (players)
 			}
 			"match one player" which is {
 				"first in the list" in {
@@ -71,7 +78,7 @@ class PlaySpec extends AnyWordSpec with Matchers {
 				val player1 = Player(1, Card(Rank.Queen, Suit.Spades) :: Nil)
 				val player2 = Player(2, Card(Rank.Queen, Suit.Spades) :: Nil)
 				val players = Vector(player1, player2)
-				findPlayersFunc(Card(Rank.Queen, Suit.Spades), players) should contain allElementsOf(players)
+				findPlayersFunc(Card(Rank.Queen, Suit.Spades), players) should contain allElementsOf (players)
 			}
 			"match one player" which is {
 				"first in the list" in {
@@ -114,7 +121,7 @@ class PlaySpec extends AnyWordSpec with Matchers {
 				val player1 = Player(1, Card(Rank.Queen, Suit.Spades) :: Nil)
 				val player2 = Player(2, Card(Rank.Queen, Suit.Spades) :: Nil)
 				val players = Vector(player1, player2)
-				findPlayersFunc(Card(Rank.Queen, Suit.Spades), players) should contain allElementsOf(players)
+				findPlayersFunc(Card(Rank.Queen, Suit.Spades), players) should contain allElementsOf (players)
 			}
 			"match one player" which is {
 				"first in the list" in {
